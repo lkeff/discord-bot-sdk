@@ -1,0 +1,12 @@
+{
+    "ping-command" : {
+        "name_localizations": {
+            "ru": "пинг",
+            "en-GB": "british_ping"
+        },
+        "description_localizations" : {
+            "ru": "Пинг по-русскому",
+            "en-GB": "British ping the bot"
+        }
+    }
+}
