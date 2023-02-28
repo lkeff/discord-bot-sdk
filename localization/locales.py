@@ -1,14 +1,14 @@
 import json
-from utils.singleton import Singleton
+import os
 from discord.interactions import Interaction
+from utils.singleton import Singleton
+from config import globals
 
 class Locales(metaclass=Singleton):
-    """
-    @TODO: Create DOC string there
-    """
+    """Allows easily localize your commands and responses."""
     
     def __init__(self):
-        with open('localization/locales.json', 'r') as file:
+        with open(os.path.join(globals.ABS_PATH, 'localization', 'locales.json'), 'r', encoding='utf-8') as file:
             self.__locales: dict = json.load(file)
 
     def get_locales(self, name: str) -> dict:
