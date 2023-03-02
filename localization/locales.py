@@ -1,8 +1,31 @@
 import json
 import os
+import inspect
+from discord import ApplicationContext
 from discord.interactions import Interaction
 from utils.singleton import Singleton
 from config import globals
+
+# Macros to localize strings
+def _(string: str, *formats: object) -> str:
+    """Main idea is to find the Interaction or CTX argument from parent function."""
+    try:
+        for value in inspect.currentframe().f_back.f_locals.values():
+            if isinstance(value, ApplicationContext):
+                return Locales().localize_string(value.interaction, string, *formats)
+            if isinstance(value, Interaction):
+                return Locales().localize_string(value, string, *formats)
+
+        for value in inspect.currentframe().f_back.f_back.f_locals.values():
+            if isinstance(value, ApplicationContext):
+                return Locales().localize_string(value.interaction, string, *formats)
+            if isinstance(value, Interaction):
+                return Locales().localize_string(value, string, *formats)
+    except:
+        pass
+
+    return string.format(*formats) if formats else string
+
 
 class Locales(metaclass=Singleton):
     """Allows easily localize your commands and responses."""
@@ -14,10 +37,11 @@ class Locales(metaclass=Singleton):
     def get_locales(self, name: str) -> dict:
         """Returns dict containing locales for current key (if not exists returns empty dict)."""
         return self.__locales.get(name, {})
-    
-    def locale_response(self, intercation: Interaction, responses: dict):
-        """Returns localed response from passed dictionary.
-        If locale not in responses.keys(), you must define default key:value in dict.
-        """
-        return responses.get(intercation.locale, responses['default'] if 'default' in responses
-                              else 'Please, define `default` key in dict')
+
+    def localize_string(self, intercation: Interaction, string: str, *formats: object) -> str:
+        """Translates only strings. If not exists returns the base string."""
+        if string in self.__locales["strings"]:
+            return_string = self.__locales["strings"][string].get(intercation.locale, string)
+            return return_string.format(*formats) if formats else string
+        else:
+            return string.format(*formats) if formats else string

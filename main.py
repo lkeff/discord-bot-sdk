@@ -14,7 +14,6 @@ if __name__ == '__main__':
 
     bot = discord.Bot(intents=discord.Intents.all())  # Bot initialization
     globals.BOT = bot                                 # BOT - global variable, bot - local
-    import events                                     # Load events
 
     for cog in cogs_list:                             # For file ends with .py in /cogs/ folder
         bot.load_extension(f'cogs.{cog}')             # Load cog
