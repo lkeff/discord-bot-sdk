@@ -1,6 +1,7 @@
 import discord
 from discord.ext import commands
 
+
 class EventsManager(commands.Cog):
     """Here can be stored events that not linked to any Cog."""
 

@@ -1,9 +1,10 @@
-from dotenv import load_dotenv, find_dotenv
+from dotenv import load_dotenv, find_dotenv  # we need to import dotenv before os
 load_dotenv(find_dotenv())
 
 import os
 import discord
 from config import globals
+
 
 if __name__ == '__main__':
     globals.ABS_PATH = os.path.dirname(os.path.abspath(__file__))

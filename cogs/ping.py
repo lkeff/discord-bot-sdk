@@ -2,7 +2,9 @@ import discord
 from discord.ext import commands
 from localization.locales import Locales, _
 
+
 class Ping(commands.Cog):
+
     def __init__(self, bot):
         self.bot: discord.Bot = bot
 
@@ -13,6 +15,7 @@ class Ping(commands.Cog):
     )
     async def ping_command(self, ctx: discord.ApplicationContext):
         await ctx.respond(_('Hello, my dear {}!', ctx.user.name) + f' {round(self.bot.latency, 2)}')
+
 
 def setup(bot):
     bot.add_cog(Ping(bot))

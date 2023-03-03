@@ -1,14 +1,17 @@
 import json
 import os
 import inspect
+
 from discord import ApplicationContext
 from discord.interactions import Interaction
+
 from utils.singleton import Singleton
 from config import globals
 
-# Macros to localize strings
+
 def _(string: str, *formats: object) -> str:
-    """Main idea is to find the Interaction or CTX argument from parent function."""
+    """Macros usage: _("String").
+    Locale will be found from Interaction or CTX argument from parent function."""
     try:
         for value in inspect.currentframe().f_back.f_locals.values():
             if isinstance(value, (ApplicationContext, Interaction)):
