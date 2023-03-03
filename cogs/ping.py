@@ -12,7 +12,7 @@ class Ping(commands.Cog):
         **Locales().get_locales('ping_command')  # get ping_command name, description translation for ru and en-GB
     )
     async def ping_command(self, ctx: discord.ApplicationContext):
-        await ctx.respond(_('Hello, my dear {}!', ctx.user.name) + f' {str(round(self.bot.latency, 2))}')
+        await ctx.respond(_('Hello, my dear {}!', ctx.user.name) + f' {round(self.bot.latency, 2)}')
 
 def setup(bot):
     bot.add_cog(Ping(bot))
