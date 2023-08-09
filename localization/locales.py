@@ -11,15 +11,16 @@ from config import globals
 
 def _(string: str, *formats: object) -> str:
     """Macros usage: _("String").
-    Locale will be found from Interaction or CTX argument from parent function."""
-    try:
-        for value in inspect.currentframe().f_back.f_locals.values():
-            if isinstance(value, (ApplicationContext, Interaction)):
-                return Locales().localize_string(value, string, *formats)
+    Locale will be found from Interaction or CTX argument from parent functions."""
+    frame = inspect.currentframe().f_back
 
-        for value in inspect.currentframe().f_back.f_back.f_locals.values():
-            if isinstance(value, (ApplicationContext, Interaction)):
-                return Locales().localize_string(value, string, *formats)
+    try:
+        while frame:
+            for value in frame.f_locals.values():
+                if isinstance(value, (ApplicationContext, Interaction)):
+                    return Locales().localize_string(value, string, *formats)
+            
+            frame = frame.f_back
     except:
         pass
 
@@ -34,7 +35,7 @@ class Locales(metaclass=Singleton):
             self.__locales: dict = json.load(file)
 
     def get_locales(self, name: str) -> dict:
-        """Returns dict containing locales for current key (if not exists returns empty dict)."""
+        """Returns dict containing locales for current key"""
         return self.__locales.get(name, {})
 
     def localize_string(self, base_arg: Interaction | ApplicationContext, string: str, *formats: object) -> str:

@@ -7,14 +7,14 @@ from config import globals
 
 
 if __name__ == '__main__':
-    globals.ABS_PATH = os.path.dirname(os.path.abspath(__file__))
+    globals.ABS_PATH = os.path.abspath(os.getcwd())
 
     cogs_list = [cog.replace('.py', '') 
                  for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs')) 
                  if cog.endswith('.py')]
 
     bot = discord.Bot(intents=discord.Intents.all())  # Bot initialization
-    globals.BOT = bot                                 # BOT - global variable, bot - local
+    globals.BOT = bot
 
     for cog in cogs_list:                             # For file ends with .py in /cogs/ folder
         bot.load_extension(f'cogs.{cog}')             # Load cog
