@@ -1,9 +1,4 @@
 {
-    "strings" : {
-        "Hello, my dear {}!" : {
-            "ru" : "Привет, мой дорогой {}!"
-        }
-    },
     "ping_command" : {
         "name_localizations": {
             "ru": "пинг",

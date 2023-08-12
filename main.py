@@ -6,17 +6,36 @@ import discord
 from config import globals
 
 
-if __name__ == '__main__':
-    globals.ABS_PATH = os.path.abspath(os.getcwd())
+def load_cogs(bot: discord.Bot):
+    """Cogs can be contained only in 1 extra folder.
+    Example: cogs/global_events.py, cogs/ping/ping.py
+    This file won't be loaded: cogs/foo/bar/viewer.py"""
+    cogs = []
+    files_in_cogs_folder = os.listdir(os.path.join(globals.ABS_PATH, 'cogs'))
 
-    cogs_list = [cog.replace('.py', '') 
-                 for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs')) 
-                 if cog.endswith('.py')]
+    folders = ['']
+    folders.extend([file
+                    for file in files_in_cogs_folder
+                    if os.path.isdir(os.path.join(globals.ABS_PATH, 'cogs', file))])
+    
+    for folder in folders:
+        cogs.extend([f"cogs.{folder + '.' if folder else ''}{cog.replace('.py', '')}" 
+                    for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs', folder)) 
+                    if cog.endswith('.py')])
 
-    bot = discord.Bot(intents=discord.Intents.all())  # Bot initialization
+    for cog in cogs:
+        bot.load_extension(cog)
+
+
+def main():
+    globals.ABS_PATH = os.path.abspath(os.getcwd())    
+
+    bot = discord.Bot(intents=discord.Intents.all())
     globals.BOT = bot
 
-    for cog in cogs_list:                             # For file ends with .py in /cogs/ folder
-        bot.load_extension(f'cogs.{cog}')             # Load cog
+    load_cogs(bot)
+    bot.run(os.getenv('BOT_TOKEN'))
 
-    bot.run(os.getenv('BOT_TOKEN'))                   # Run with token from .env (or smth)
+
+if __name__ == '__main__':
+    main()
