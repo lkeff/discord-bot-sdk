@@ -8,7 +8,7 @@ from config import globals
 
 def load_cogs(bot: discord.Bot):
     """Cogs can be contained only in 1 extra folder.
-    Example: cogs/global_events.py, cogs/ping/ping.py
+    Example: cogs/global_events.py, cogs/ping/ping.py, cogs/game/game.py
     This file won't be loaded: cogs/foo/bar/viewer.py"""
     cogs = []
     files_in_cogs_folder = os.listdir(os.path.join(globals.ABS_PATH, 'cogs'))
@@ -17,10 +17,14 @@ def load_cogs(bot: discord.Bot):
     folders.extend([file
                     for file in files_in_cogs_folder
                     if os.path.isdir(os.path.join(globals.ABS_PATH, 'cogs', file))])
-    
+
+    # Always include 'game' folder for new mini-mods
+    if 'game' not in folders:
+        folders.append('game')
+
     for folder in folders:
-        cogs.extend([f"cogs.{folder + '.' if folder else ''}{cog.replace('.py', '')}" 
-                    for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs', folder)) 
+        cogs.extend([f"cogs.{folder + '.' if folder else ''}{cog.replace('.py', '')}"
+                    for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs', folder))
                     if cog.endswith('.py')])
 
     for cog in cogs:
