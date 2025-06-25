@@ -10,7 +10,10 @@ class EventsManager(commands.Cog):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        print(f"{self.bot.user} is ready and online!")
+        import logging
+        from utils.redact import redact_sensitive
+        logging.basicConfig(level=logging.INFO)
+        logging.info(redact_sensitive(f"{self.bot.user} is ready and online!"))
     
 
 def setup(bot):
