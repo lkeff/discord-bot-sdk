@@ -2,8 +2,10 @@ from dotenv import load_dotenv, find_dotenv  # we need to import dotenv before o
 load_dotenv(find_dotenv())
 
 import os
+import sys
 import discord
-from config import globals
+sys.path.append(os.path.join(os.path.dirname(__file__), 'config'))
+import globals
 
 
 def load_cogs(bot: discord.Bot):
@@ -22,10 +24,15 @@ def load_cogs(bot: discord.Bot):
     if 'game' not in folders:
         folders.append('game')
 
+    # Always include calm_guard for moderation
+    if 'calm_guard.py' not in files_in_cogs_folder:
+        raise FileNotFoundError("calm_guard.py cog is missing in cogs directory!")
+    cogs.append('cogs.calm_guard')
+
     for folder in folders:
         cogs.extend([f"cogs.{folder + '.' if folder else ''}{cog.replace('.py', '')}"
                     for cog in os.listdir(os.path.join(globals.ABS_PATH, 'cogs', folder))
-                    if cog.endswith('.py')])
+                    if cog.endswith('.py') and cog != 'calm_guard.py'])
 
     for cog in cogs:
         bot.load_extension(cog)
