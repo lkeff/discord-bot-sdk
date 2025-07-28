@@ -2,8 +2,12 @@ import discord
 from discord.ext import commands
 import os
 import openai
+from dotenv import load_dotenv
 
+# Securely load secrets from .env if present
+load_dotenv()
 openai.api_key = os.getenv("OPENAI_API_KEY")
+# Ensure secrets are never hardcoded or printed
 
 # List of phrases/questions to block
 BLOCKED_INQUIRIES = [
@@ -15,13 +19,17 @@ BLOCKED_INQUIRIES = [
 
 def contains_blocked_inquiry(content):
     lowered = content.lower()
-    return any(phrase in lowered for phrase in BLOCKED_INQUIRIES)
+    # Block classified, operational, or inspection prompts
+    classified_phrases = ["classified", "secret", "operation", "mission", "deployment", "orders"]
+    return any(phrase in lowered for phrase in BLOCKED_INQUIRIES + classified_phrases)
 
 # Helper to check for repetition/inspection prompts
 REPETITION_KEYWORDS = ["repeat after me", "say this", "recite", "inspection"]
 def contains_repetition(content):
     lowered = content.lower()
-    return any(kw in lowered for kw in REPETITION_KEYWORDS)
+    # Block repetition, inspection, and drill/recite prompts
+    repetition_extras = ["drill", "exercise", "repeat after me", "say exactly"]
+    return any(kw in lowered for kw in REPETITION_KEYWORDS + repetition_extras)
 
 class CalmGuard(commands.Cog):
     # List of allowed roles for bot interaction
@@ -35,6 +43,7 @@ class CalmGuard(commands.Cog):
     def contains_profanity(content):
         # Simple profanity check (expand as needed)
         profanities = ["fuck", "shit", "bitch", "asshole"]
+        # Add more severe/obfuscated forms as needed
         lowered = content.lower()
         return any(word in lowered for word in profanities)
 
@@ -71,7 +80,12 @@ class CalmGuard(commands.Cog):
         import logging
         from utils.redact import redact_sensitive
         logging.basicConfig(level=logging.INFO)
-        # Example: logging.info(redact_sensitive(message.content))  # Uncomment to log redacted message content
+        # Always redact sensitive info in logs
+        def safe_log(msg):
+            logging.info(redact_sensitive(msg))
+        # Uncomment to enable logging of redacted message content
+        # safe_log(message.content)
+
         if message.author.bot:
             return
         if self.bot.user not in message.mentions:
@@ -98,9 +112,24 @@ class CalmGuard(commands.Cog):
         if contains_repetition(message.content):
             await message.reply("No repetition or inspection exercises, please.")
             return
-        response = await self.get_calm_response(message.content)
+        # --- Mood, language, and tense/context analysis ---
+        from utils.mood_analysis import detect_language, detect_mood, tense_analysis, full_mood_callback
+        # Gather context: last 3 user messages (if available)
+        user_id = message.author.id
+        if not hasattr(self, 'user_histories'):
+            self.user_histories = {}
+        if user_id not in self.user_histories:
+            self.user_histories[user_id] = []
+        self.user_histories[user_id].append(message.content)
+        if len(self.user_histories[user_id]) > 3:
+            self.user_histories[user_id] = self.user_histories[user_id][-3:]
+        past_contexts = '\n'.join(self.user_histories[user_id][:-1]) if len(self.user_histories[user_id]) > 1 else None
+
+        # Get full mood/language/tense callback from OpenAI
+        analysis = full_mood_callback(message.content, past_contexts)
+        response = await self.get_calm_response(f"{message.content}\n\nAnalysis: {analysis}")
         if response:
-            await message.reply(response)
+            await message.reply(f"{response}\n\n(Analysis: {analysis})")
 
     # Deployment: After testing, deploy this bot to a secure VPS or cloud instance.
 
